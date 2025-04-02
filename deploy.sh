@@ -127,9 +127,8 @@ echo "Creating and activating conda environment..."
 source /home/ubuntu/miniconda/bin/activate fastapi-env
 
 
-# 의존성 설치 전 pip 캐시 완전 제거
-echo "Cleaning pip cache..."
-pip cache purge
+# pip 캐시 디렉토리 삭제
+echo "Cleaning pip cache directory..."
 rm -rf ~/.cache/pip
 
 # 의존성 설치
