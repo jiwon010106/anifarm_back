@@ -45,3 +45,4 @@ jobs:
             chmod +x deploy.sh &&
             DB_VARIABLES='"'"'${{ secrets.DB_VARIABLES }}'"'"' sudo -E bash deploy.sh
           '
+#
