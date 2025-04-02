@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e  # 오류 발생시 스크립트 중단
 
+# 디스크 공간 정리
+echo "Cleaning up disk space..."
+sudo apt-get clean
+sudo apt-get autoremove -y
+sudo rm -rf /var/lib/apt/lists/*
+sudo rm -rf /tmp/*
+sudo rm -rf ~/.cache/pip
 
 echo "deleting old app"
 sudo rm -rf /var/www/back
@@ -107,7 +114,7 @@ source /home/ubuntu/miniconda/bin/activate fastapi-env
 
 # 의존성 설치
 echo "Installing dependencies..."
-pip install -r requirements.txt
+pip install --no-cache-dir -r requirements.txt
 
 
 # Nginx 설정 테스트 및 재시작
