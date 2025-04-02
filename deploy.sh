@@ -178,7 +178,12 @@ sudo systemctl restart nginx
 # 애플리케이션 시작
 echo "Starting FastAPI application..."
 cd /var/www/back
-nohup /home/ubuntu/miniconda/envs/fastapi-env/bin/uvicorn app:app --host 0.0.0.0 --port 8000 --workers 3 > /var/log/fastapi/uvicorn.log 2>&1 &
+
+# 기존 프로세스 정리
+sudo pkill uvicorn || true
+
+# ubuntu 사용자로 uvicorn 실행
+sudo -u ubuntu bash -c 'cd /var/www/back && nohup python -m uvicorn app:app --host 0.0.0.0 --port 8000 --workers 3 --log-level debug > /var/log/fastapi/uvicorn.log 2>&1 &'
 
 # 애플리케이션 시작 확인을 위한 대기
 sleep 5
