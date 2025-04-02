@@ -1,17 +1,44 @@
 #!/bin/bash
 set -e  # 오류 발생시 스크립트 중단
 
-# 디스크 공간 정리 (기본적인 정리만 수행)
-echo "Cleaning up disk space..."
+# 시스템 캐시 및 임시 파일 정리
+echo "Performing deep cleanup..."
 sudo apt-get clean
 sudo apt-get autoremove -y
+sudo apt-get purge -y
 sudo rm -rf /var/lib/apt/lists/*
 sudo rm -rf /tmp/*
 sudo rm -rf ~/.cache/pip
+sudo rm -rf ~/.cache/conda
+sudo rm -rf /var/cache/apt/archives/*
+sudo rm -rf /var/log/journal/*
+sudo journalctl --vacuum-time=1d
+
+# Python 관련 캐시 파일 정리
+echo "Cleaning Python cache..."
+find . -type d -name "__pycache__" -exec rm -rf {} +
+find . -type f -name "*.pyc" -delete
+find . -type f -name "*.pyo" -delete
+find . -type f -name "*.pyd" -delete
+find . -type d -name "*.egg-info" -exec rm -rf {} +
+find . -type d -name "*.egg" -exec rm -rf {} +
+find . -type d -name ".pytest_cache" -exec rm -rf {} +
+find . -type d -name ".coverage" -exec rm -rf {} +
+find . -type d -name "htmlcov" -exec rm -rf {} +
+
+# Conda 환경 완전 정리
+echo "Removing all conda environments..."
+source /home/ubuntu/miniconda/bin/activate
+conda remove --name fastapi-env --all -y || true
+conda clean --all -y
 
 # 기존 배포 파일 정리
 echo "Cleaning up old deployments..."
+sudo systemctl stop nginx || true
+sudo pkill uvicorn || true
 sudo rm -rf /var/www/back
+sudo rm -rf /var/log/fastapi/*
+sudo rm -rf /var/log/nginx/*
 
 echo "Current disk space usage:"
 df -h
