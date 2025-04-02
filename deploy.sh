@@ -61,16 +61,13 @@ echo "Setting up .env file..."
 if [ -n "$DB_VARIABLES" ]; then
     echo "$DB_VARIABLES" | sudo tee .env > /dev/null
     sudo chown ubuntu:ubuntu .env
-    sudo chmod 600 .env
     echo ".env file created from DB_VARIABLES"
 elif [ -f env ]; then
     sudo mv env .env
     sudo chown ubuntu:ubuntu .env
-    sudo chmod 600 .env
     echo ".env file created from env file"
 elif [ -f .env ]; then
     sudo chown ubuntu:ubuntu .env
-    sudo chmod 600 .env
     echo ".env file already exists"
 else
     echo "Warning: No environment variables found"
