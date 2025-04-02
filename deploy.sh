@@ -72,7 +72,6 @@ fi
 
 # Conda 환경 관리
 echo "Setting up conda environment..."
-export PATH="/home/ubuntu/miniconda/bin:$PATH"
 
 # 미니콘다 설치 (없는 경우)
 if [ ! -d "/home/ubuntu/miniconda" ]; then
@@ -80,10 +79,22 @@ if [ ! -d "/home/ubuntu/miniconda" ]; then
     wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh
     bash /tmp/miniconda.sh -b -p /home/ubuntu/miniconda
     rm /tmp/miniconda.sh
+    
+    # Miniconda 초기화
+    /home/ubuntu/miniconda/bin/conda init bash
+    source ~/.bashrc
 fi
 
+# PATH에 Miniconda 추가
+export PATH="/home/ubuntu/miniconda/bin:$PATH"
+
 # Conda 초기화 및 환경 설정
-source /home/ubuntu/miniconda/bin/activate
+if [ -f "/home/ubuntu/miniconda/bin/activate" ]; then
+    source /home/ubuntu/miniconda/bin/activate
+else
+    echo "Error: Miniconda activate script not found"
+    exit 1
+fi
 
 # 기존 환경이 있으면 삭제하고 새로 생성
 conda env remove -n fastapi-env --yes || true
