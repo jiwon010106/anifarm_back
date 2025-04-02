@@ -25,7 +25,7 @@ elif [ -f .env ]; then
     sudo chown ubuntu:ubuntu .env
     echo ".env file already exists"
 fi
-
+# 111
 
 # .env 파일 확인
 echo "Checking .env file..."
