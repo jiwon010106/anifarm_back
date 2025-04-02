@@ -56,13 +56,22 @@ sudo cp -r * /var/www/back/
 # Navigate to the app directory and handle .env file
 cd /var/www/back/
 echo "Setting up .env file..."
-if [ -f env ]; then
+
+# .env 파일 생성
+if [ -n "$DB_VARIABLES" ]; then
+    echo "$DB_VARIABLES" | sudo tee .env > /dev/null
+    sudo chown ubuntu:ubuntu .env
+    echo ".env file created from DB_VARIABLES"
+elif [ -f env ]; then
     sudo mv env .env
     sudo chown ubuntu:ubuntu .env
     echo ".env file created from env file"
 elif [ -f .env ]; then
     sudo chown ubuntu:ubuntu .env
     echo ".env file already exists"
+else
+    echo "Warning: No environment variables found"
+    exit 1
 fi
 
 # .env 파일 확인
@@ -71,7 +80,8 @@ if [ -f .env ]; then
     echo ".env file exists"
     ls -la .env
 else
-    echo "Warning: .env file not found"
+    echo "Error: .env file not found"
+    exit 1
 fi
 
 # Conda 환경 관리

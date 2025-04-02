@@ -36,7 +36,7 @@ jobs:
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
-          ENV_VARS: ${{ secrets.DB_VARIABLES }}
+          DB_VARIABLES: ${{ secrets.DB_VARIABLES }}
         run: |
           # 임시 배포 디렉토리 생성 및 파일 전송
           ssh -i ~/.ssh/id_rsa -o ConnectTimeout=10 ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} '
@@ -50,7 +50,5 @@ jobs:
           ssh -i ~/.ssh/id_rsa -o ConnectTimeout=10 ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} '
             cd ~/app_deploy &&
             chmod +x deploy.sh &&
-            echo '"'"'${{ secrets.DB_VARIABLES }}'"'"' | sudo tee .env > /dev/null &&
-            sudo chown ubuntu:ubuntu .env &&
-            sudo -E bash deploy.sh
+            DB_VARIABLES='"'"'${{ secrets.DB_VARIABLES }}'"'"' sudo -E bash deploy.sh
           '
