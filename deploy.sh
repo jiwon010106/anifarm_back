@@ -61,13 +61,16 @@ echo "Setting up .env file..."
 if [ -n "$DB_VARIABLES" ]; then
     echo "$DB_VARIABLES" | sudo tee .env > /dev/null
     sudo chown ubuntu:ubuntu .env
+    sudo chmod 600 .env
     echo ".env file created from DB_VARIABLES"
 elif [ -f env ]; then
     sudo mv env .env
     sudo chown ubuntu:ubuntu .env
+    sudo chmod 600 .env
     echo ".env file created from env file"
 elif [ -f .env ]; then
     sudo chown ubuntu:ubuntu .env
+    sudo chmod 600 .env
     echo ".env file already exists"
 else
     echo "Warning: No environment variables found"
@@ -182,8 +185,16 @@ cd /var/www/back
 # 기존 프로세스 정리
 sudo pkill uvicorn || true
 
+# 환경 변수 설정
+export PATH="/home/ubuntu/miniconda/envs/fastapi-env/bin:$PATH"
+
 # ubuntu 사용자로 uvicorn 실행
-sudo -u ubuntu bash -c 'cd /var/www/back && nohup python -m uvicorn app:app --host 0.0.0.0 --port 8000 --workers 3 --log-level debug > /var/log/fastapi/uvicorn.log 2>&1 &'
+sudo -u ubuntu bash -c '
+    cd /var/www/back &&
+    source /home/ubuntu/miniconda/bin/activate &&
+    conda activate fastapi-env &&
+    nohup python -m uvicorn app:app --host 0.0.0.0 --port 8000 --workers 3 --log-level debug > /var/log/fastapi/uvicorn.log 2>&1 &
+'
 
 # 애플리케이션 시작 확인을 위한 대기
 sleep 5
