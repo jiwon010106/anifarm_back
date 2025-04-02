@@ -1,0 +1,6 @@
+Model Performance Metrics for tomato
+Data points used: 1291
+R2 Score: 0.9604
+MAE: 2272.85
+RMSE: 3806.89
+Features used: month, day, dayofweek, season, price_ma3, price_ma7, price_ma30, price_std3, price_std7, price_std30, price_change, price_change_ma7, month_sin, month_cos

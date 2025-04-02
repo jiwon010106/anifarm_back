@@ -1,0 +1,6 @@
+Model Performance Metrics for potato
+Data points used: 1293
+R2 Score: 0.9945
+MAE: 814.71
+RMSE: 1273.15
+Features used: month, day, dayofweek, season, price_ma3, price_ma7, price_ma30, price_std3, price_std7, price_std30, price_change, price_change_ma7, month_sin, month_cos

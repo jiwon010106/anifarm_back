@@ -1,0 +1,6 @@
+Model Performance Metrics for broccoli
+Data points used: 1244
+R2 Score: 0.9504
+MAE: 1618.75
+RMSE: 3178.07
+Features used: month, day, dayofweek, season, price_ma3, price_ma7, price_ma30, price_std3, price_std7, price_std30, price_change, price_change_ma7, month_sin, month_cos
