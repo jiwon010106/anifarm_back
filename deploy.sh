@@ -8,18 +8,33 @@ sudo apt-get autoremove -y
 sudo rm -rf /var/lib/apt/lists/*
 sudo rm -rf /tmp/*
 sudo rm -rf ~/.cache/pip
+sudo rm -rf /var/cache/apt/*
+sudo rm -rf /var/tmp/*
+sudo journalctl --vacuum-time=1d  # 시스템 로그 정리
+sudo find /var/log -type f -name "*.log" -exec truncate -s 0 {} \;  # 로그 파일 비우기
+
+# 기존 배포 파일 정리
+echo "Cleaning up old deployments..."
+sudo rm -rf /var/www/fastapi-dp-test
+sudo rm -rf /var/www/back
+
+# Docker 정리 (Docker 사용 중인 경우)
+if command -v docker &> /dev/null; then
+    echo "Cleaning up Docker..."
+    docker system prune -af
+fi
+
+echo "Current disk space usage:"
+df -h
 
 echo "deleting old app"
 sudo rm -rf /var/www/back
 
-
 echo "creating app folder"
 sudo mkdir -p /var/www/back
 
-
 echo "moving files to app folder"
 sudo cp -r * /var/www/back/
-
 
 # Navigate to the app directory and handle .env file
 cd /var/www/back/
@@ -111,6 +126,11 @@ echo "Creating and activating conda environment..."
 /home/ubuntu/miniconda/bin/conda create -y -n fastapi-env python=3.12 || true
 source /home/ubuntu/miniconda/bin/activate fastapi-env
 
+
+# 의존성 설치 전 pip 캐시 완전 제거
+echo "Cleaning pip cache..."
+pip cache purge
+rm -rf ~/.cache/pip
 
 # 의존성 설치
 echo "Installing dependencies..."
