@@ -159,3 +159,5 @@ echo "Deployment completed successfully! 🚀"
 echo "Checking service status..."
 ps aux | grep uvicorn
 sudo systemctl status nginx
+
+# 1
