@@ -28,25 +28,29 @@ jobs:
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
 
+      - name: Test SSH connection
+        run: ssh -i ~/.ssh/id_rsa -o ConnectTimeout=10 ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'echo "SSH connection successful"'
+
+
       - name: Deploy to EC2
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
           ENV_VARS: ${{ secrets.DB_VARIABLES }}
         run: |
-          # 임시 배포 디렉토리 생성
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'mkdir -p ~/app_deploy'
+          # 임시 배포 디렉토리 생성 및 파일 전송
+          ssh -i ~/.ssh/id_rsa -o ConnectTimeout=10 ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} '
+            rm -rf ~/app_deploy &&
+            mkdir -p ~/app_deploy
+          '
+          
+          scp -i ~/.ssh/id_rsa -o ConnectTimeout=10 -r ./* ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/app_deploy/
 
-
-          # 파일 전송
-          scp -i ~/.ssh/id_rsa -r ./* ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/app_deploy/
-
-
-          # 환경 변수를 안전하게 전달
-          ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "
+          # 배포 실행
+          ssh -i ~/.ssh/id_rsa -o ConnectTimeout=10 ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} '
             cd ~/app_deploy &&
             chmod +x deploy.sh &&
-            echo '${{ secrets.DB_VARIABLES }}' | sudo tee .env > /dev/null &&
+            echo '"'"'${{ secrets.DB_VARIABLES }}'"'"' | sudo tee .env > /dev/null &&
             sudo chown ubuntu:ubuntu .env &&
             sudo -E bash deploy.sh
-          "
+          '
