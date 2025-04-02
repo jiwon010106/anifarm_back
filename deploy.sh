@@ -1,34 +1,20 @@
 #!/bin/bash
 set -e  # 오류 발생시 스크립트 중단
 
-# 디스크 공간 정리
+# 디스크 공간 정리 (기본적인 정리만 수행)
 echo "Cleaning up disk space..."
 sudo apt-get clean
 sudo apt-get autoremove -y
 sudo rm -rf /var/lib/apt/lists/*
 sudo rm -rf /tmp/*
 sudo rm -rf ~/.cache/pip
-sudo rm -rf /var/cache/apt/*
-sudo rm -rf /var/tmp/*
-sudo journalctl --vacuum-time=1d  # 시스템 로그 정리
-sudo find /var/log -type f -name "*.log" -exec truncate -s 0 {} \;  # 로그 파일 비우기
 
 # 기존 배포 파일 정리
 echo "Cleaning up old deployments..."
-sudo rm -rf /var/www/fastapi-dp-test
 sudo rm -rf /var/www/back
-
-# Docker 정리 (Docker 사용 중인 경우)
-if command -v docker &> /dev/null; then
-    echo "Cleaning up Docker..."
-    docker system prune -af
-fi
 
 echo "Current disk space usage:"
 df -h
-
-echo "deleting old app"
-sudo rm -rf /var/www/back
 
 echo "creating app folder"
 sudo mkdir -p /var/www/back
@@ -47,7 +33,6 @@ elif [ -f .env ]; then
     sudo chown ubuntu:ubuntu .env
     echo ".env file already exists"
 fi
-# 111
 
 # .env 파일 확인
 echo "Checking .env file..."
@@ -58,22 +43,27 @@ else
     echo "Warning: .env file not found"
 fi
 
+# Conda 환경 관리
+echo "Setting up conda environment..."
+export PATH="/home/ubuntu/miniconda/bin:$PATH"
 
 # 미니콘다 설치 (없는 경우)
 if [ ! -d "/home/ubuntu/miniconda" ]; then
     echo "Installing Miniconda..."
     wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh
-    sudo chown ubuntu:ubuntu /tmp/miniconda.sh
     bash /tmp/miniconda.sh -b -p /home/ubuntu/miniconda
     rm /tmp/miniconda.sh
 fi
 
-
-# PATH에 미니콘다 추가
-export PATH="/home/ubuntu/miniconda/bin:$PATH"
+# Conda 초기화 및 환경 설정
 source /home/ubuntu/miniconda/bin/activate
 
-# Update and install Nginx if not already installed
+# 기존 환경이 있으면 삭제하고 새로 생성
+conda env remove -n fastapi-env --yes || true
+conda create -n fastapi-env python=3.12 -y
+conda activate fastapi-env
+
+# Nginx 설치 및 설정
 if ! command -v nginx > /dev/null; then
     echo "Installing Nginx"
     sudo apt-get update
@@ -87,7 +77,6 @@ server {
     listen 80;
     server_name _;
 
-
     location / {
         proxy_pass http://127.0.0.1:8000;
         proxy_http_version 1.1;
@@ -99,66 +88,45 @@ server {
 }
 EOF'
 
-
 # Nginx 설정 심볼릭 링크 생성
 sudo ln -sf /etc/nginx/sites-available/myapp /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
-
 
 # 로그 파일 설정
 sudo mkdir -p /var/log/fastapi
 sudo touch /var/log/fastapi/uvicorn.log
 sudo chown -R ubuntu:ubuntu /var/log/fastapi
 
-
 # 기존 프로세스 정리
 echo "Cleaning up existing processes..."
 sudo pkill uvicorn || true
 sudo systemctl stop nginx || true
 
-
 # 애플리케이션 디렉토리 권한 설정
 sudo chown -R ubuntu:ubuntu /var/www/back
-
-
-# 콘다 환경 생성 및 활성화
-echo "Creating and activating conda environment..."
-/home/ubuntu/miniconda/bin/conda create -y -n fastapi-env python=3.12 || true
-source /home/ubuntu/miniconda/bin/activate fastapi-env
-
-
-# pip 캐시 디렉토리 삭제
-echo "Cleaning pip cache directory..."
-rm -rf ~/.cache/pip
 
 # 의존성 설치
 echo "Installing dependencies..."
 pip install --no-cache-dir -r requirements.txt
-
 
 # Nginx 설정 테스트 및 재시작
 echo "Testing and restarting Nginx..."
 sudo nginx -t
 sudo systemctl restart nginx
 
-
 # 애플리케이션 시작
 echo "Starting FastAPI application..."
 cd /var/www/back
 nohup /home/ubuntu/miniconda/envs/fastapi-env/bin/uvicorn app:app --host 0.0.0.0 --port 8000 --workers 3 > /var/log/fastapi/uvicorn.log 2>&1 &
 
-
 # 애플리케이션 시작 확인을 위한 대기
 sleep 5
-
 
 # 로그 확인
 echo "Recent application logs:"
 tail -n 20 /var/log/fastapi/uvicorn.log || true
 
-
 echo "Deployment completed successfully! 🚀"
-
 
 # 상태 확인
 echo "Checking service status..."
