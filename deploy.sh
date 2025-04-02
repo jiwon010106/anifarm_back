@@ -26,12 +26,6 @@ find . -type d -name ".pytest_cache" -exec rm -rf {} +
 find . -type d -name ".coverage" -exec rm -rf {} +
 find . -type d -name "htmlcov" -exec rm -rf {} +
 
-# Conda 환경 완전 정리
-echo "Removing all conda environments..."
-source /home/ubuntu/miniconda/bin/activate
-conda remove --name fastapi-env --all -y || true
-conda clean --all -y
-
 # 기존 배포 파일 정리
 echo "Cleaning up old deployments..."
 sudo systemctl stop nginx || true
@@ -91,15 +85,20 @@ export PATH="/home/ubuntu/miniconda/bin:$PATH"
 # Conda 초기화 및 환경 설정
 if [ -f "/home/ubuntu/miniconda/bin/activate" ]; then
     source /home/ubuntu/miniconda/bin/activate
+    
+    # Conda 환경 완전 정리
+    echo "Removing all conda environments..."
+    conda remove --name fastapi-env --all -y || true
+    conda clean --all -y
+    
+    # 기존 환경이 있으면 삭제하고 새로 생성
+    conda env remove -n fastapi-env --yes || true
+    conda create -n fastapi-env python=3.12 -y
+    conda activate fastapi-env
 else
     echo "Error: Miniconda activate script not found"
     exit 1
 fi
-
-# 기존 환경이 있으면 삭제하고 새로 생성
-conda env remove -n fastapi-env --yes || true
-conda create -n fastapi-env python=3.12 -y
-conda activate fastapi-env
 
 # Nginx 설치 및 설정
 if ! command -v nginx > /dev/null; then
