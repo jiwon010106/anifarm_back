@@ -42,10 +42,11 @@ jobs:
           scp -i ~/.ssh/id_rsa -r ./* ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/app_deploy/
 
 
-          # 환경 변수를 한 번에 전달
+          # 환경 변수를 안전하게 전달
           ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "
             cd ~/app_deploy &&
             chmod +x deploy.sh &&
-            echo '${{ secrets.DB_VARIABLES }}' > .env &&
+            echo '${{ secrets.DB_VARIABLES }}' | sudo tee .env > /dev/null &&
+            sudo chown ubuntu:ubuntu .env &&
             sudo -E bash deploy.sh
           "
