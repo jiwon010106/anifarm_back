@@ -1,6 +1,17 @@
 #!/bin/bash
 set -e  # 오류 발생시 스크립트 중단
 
+# 디스크 공간 확인
+echo "Initial disk space usage:"
+df -h
+
+# pip 임시 디렉토리 정리
+echo "Cleaning pip cache..."
+rm -rf ~/.cache/pip
+rm -rf /tmp/pip-*
+rm -rf /tmp/build
+rm -rf /tmp/wheel*
+
 # 시스템 캐시 및 임시 파일 정리
 echo "Performing deep cleanup..."
 sudo apt-get clean
@@ -8,7 +19,6 @@ sudo apt-get autoremove -y
 sudo apt-get purge -y
 sudo rm -rf /var/lib/apt/lists/*
 sudo rm -rf /tmp/*
-sudo rm -rf ~/.cache/pip
 sudo rm -rf ~/.cache/conda
 sudo rm -rf /var/cache/apt/archives/*
 sudo rm -rf /var/log/journal/*
@@ -144,6 +154,10 @@ sudo chown -R ubuntu:ubuntu /var/www/back
 
 # 의존성 설치
 echo "Installing dependencies..."
+# pip 캐시 사용하지 않고 설치
+pip install --no-cache-dir --no-deps -r requirements.txt
+
+# 나머지 의존성 설치
 pip install --no-cache-dir -r requirements.txt
 
 # Nginx 설정 테스트 및 재시작
