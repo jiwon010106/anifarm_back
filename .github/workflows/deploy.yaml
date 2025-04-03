@@ -13,17 +13,28 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Create SSH directory
-        run: mkdir -p ~/.ssh/
-
-      - name: Store SSH key
+      # SSH 설정 및 테스트
+      - name: Configure SSH
         run: |
+          mkdir -p ~/.ssh/
           echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+          echo "SSH key configured"
+          
+          # SSH 연결 테스트
+          ssh -i ~/.ssh/id_rsa -o ConnectTimeout=10 ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'echo "Connection test successful"'
 
-      - name: Test SSH connection
-        run: ssh -i ~/.ssh/id_rsa -o ConnectTimeout=10 ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} 'echo "SSH connection successful"'
+      # 기본 디렉토리 생성 테스트
+      - name: Test basic commands
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} '
+            echo "Current directory: $(pwd)"
+            echo "Creating test directory..."
+            mkdir -p ~/test_deploy
+            echo "Directory created"
+            ls -la ~/
+          '
 
       - name: Deploy to EC2
         env:
