@@ -134,15 +134,18 @@ if [ -n "$DB_VARIABLES" ]; then
     sudo chown ubuntu:ubuntu .env
     sudo chmod 600 .env
     echo ".env file created from DB_VARIABLES"
+    source .env
 elif [ -f env ]; then
     sudo mv env .env
     sudo chown ubuntu:ubuntu .env
     sudo chmod 600 .env
     echo ".env file created from env file"
+    source .env
 elif [ -f .env ]; then
     sudo chown ubuntu:ubuntu .env
     sudo chmod 600 .env
     echo ".env file already exists"
+    source .env
 else
     echo "Warning: No environment variables found"
     exit 1
@@ -155,6 +158,8 @@ if [ -f .env ]; then
     ls -la .env
     echo "Environment variables:"
     cat .env
+    echo "Current environment variables:"
+    env | grep -E "DB_|JWT_|EMAIL_|WEATHER_|KMA_|KAMIS_|DATA|YOUTUBE_|NAVER_|MAIL_|YOUNG_|INFO|OPENAI_|TAVILY_"
 else
     echo "Error: .env file not found"
     exit 1
