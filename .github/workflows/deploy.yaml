@@ -29,6 +29,31 @@ jobs:
         env:
           EC2_HOST: ${{ secrets.EC2_HOST }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASS: ${{ secrets.DB_PASS }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_PORT: ${{ secrets.DB_PORT }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          EMAIL: ${{ secrets.EMAIL }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+          WEATHER_API_KEY: ${{ secrets.WEATHER_API_KEY }}
+          KMA_API_KEY: ${{ secrets.KMA_API_KEY }}
+          KAMIS_API_KEY: ${{ secrets.KAMIS_API_KEY }}
+          DATAENCODING_API_KEY: ${{ secrets.DATAENCODING_API_KEY }}
+          DATADECODING_API_KEY: ${{ secrets.DATADECODING_API_KEY }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+          NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          MAIL_PORT: ${{ secrets.MAIL_PORT }}
+          MAIL_SERVER: ${{ secrets.MAIL_SERVER }}
+          YOUNG_API_KEY: ${{ secrets.YOUNG_API_KEY }}
+          INFORMATION_API_KEY: ${{ secrets.INFORMATION_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
         run: |
           # 임시 배포 디렉토리 생성 및 파일 전송
           ssh -i ~/.ssh/id_rsa -o ConnectTimeout=10 ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} '
@@ -38,38 +63,42 @@ jobs:
           
           scp -i ~/.ssh/id_rsa -o ConnectTimeout=10 -r ./* ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/app_deploy/
 
-          # 환경 변수를 따옴표로 감싸서 전달
-          ssh -i ~/.ssh/id_rsa -o ConnectTimeout=10 ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} "
+          # 환경 변수 파일 생성
+          echo "DB_HOST=${DB_HOST}
+DB_USER=${DB_USER}
+DB_PASS=${DB_PASS}
+DB_NAME=${DB_NAME}
+DB_PORT=${DB_PORT}
+JWT_SECRET=${JWT_SECRET}
+EMAIL=${EMAIL}
+EMAIL_PASSWORD=${EMAIL_PASSWORD}
+WEATHER_API_KEY=${WEATHER_API_KEY}
+KMA_API_KEY=${KMA_API_KEY}
+KAMIS_API_KEY=${KAMIS_API_KEY}
+DATAENCODING_API_KEY=${DATAENCODING_API_KEY}
+DATADECODING_API_KEY=${DATADECODING_API_KEY}
+YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
+NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
+MAIL_USERNAME=${MAIL_USERNAME}
+MAIL_PASSWORD=${MAIL_PASSWORD}
+MAIL_FROM=${MAIL_FROM}
+MAIL_PORT=${MAIL_PORT}
+MAIL_SERVER=${MAIL_SERVER}
+YOUNG_API_KEY=${YOUNG_API_KEY}
+INFORMATION_API_KEY=${INFORMATION_API_KEY}
+OPENAI_API_KEY=${OPENAI_API_KEY}
+TAVILY_API_KEY=${TAVILY_API_KEY}" > temp.env
+
+          # 환경 변수 파일 전송 및 배포
+          scp -i ~/.ssh/id_rsa temp.env ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/app_deploy/.env
+          rm temp.env
+
+          # 배포 실행
+          ssh -i ~/.ssh/id_rsa -o ConnectTimeout=10 ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} '
             cd ~/app_deploy &&
-            cat > .env << 'EOL'
-DB_HOST='${{ secrets.DB_HOST }}'
-DB_USER='${{ secrets.DB_USER }}'
-DB_PASS='${{ secrets.DB_PASS }}'
-DB_NAME='${{ secrets.DB_NAME }}'
-DB_PORT='${{ secrets.DB_PORT }}'
-JWT_SECRET='${{ secrets.JWT_SECRET }}'
-EMAIL='${{ secrets.EMAIL }}'
-EMAIL_PASSWORD='${{ secrets.EMAIL_PASSWORD }}'
-WEATHER_API_KEY='${{ secrets.WEATHER_API_KEY }}'
-KMA_API_KEY='${{ secrets.KMA_API_KEY }}'
-KAMIS_API_KEY='${{ secrets.KAMIS_API_KEY }}'
-DATAENCODING_API_KEY='${{ secrets.DATAENCODING_API_KEY }}'
-DATADECODING_API_KEY='${{ secrets.DATADECODING_API_KEY }}'
-YOUTUBE_API_KEY='${{ secrets.YOUTUBE_API_KEY }}'
-NAVER_CLIENT_ID='${{ secrets.NAVER_CLIENT_ID }}'
-NAVER_CLIENT_SECRET='${{ secrets.NAVER_CLIENT_SECRET }}'
-MAIL_USERNAME='${{ secrets.MAIL_USERNAME }}'
-MAIL_PASSWORD='${{ secrets.MAIL_PASSWORD }}'
-MAIL_FROM='${{ secrets.MAIL_FROM }}'
-MAIL_PORT='${{ secrets.MAIL_PORT }}'
-MAIL_SERVER='${{ secrets.MAIL_SERVER }}'
-YOUNG_API_KEY='${{ secrets.YOUNG_API_KEY }}'
-INFORMATION_API_KEY='${{ secrets.INFORMATION_API_KEY }}'
-OPENAI_API_KEY='${{ secrets.OPENAI_API_KEY }}'
-TAVILY_API_KEY='${{ secrets.TAVILY_API_KEY }}'
-EOL
             chmod 600 .env &&
             chmod +x deploy.sh &&
             sudo -E bash deploy.sh
-          "
+          '
 #
