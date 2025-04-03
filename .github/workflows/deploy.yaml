@@ -32,13 +32,17 @@ jobs:
         run: |
           # 임시 배포 디렉토리 생성 및 파일 전송
           ssh -i ~/.ssh/id_rsa -o ConnectTimeout=10 ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} '
-            rm -rf ~/app_deploy &&
+            set -x
+            rm -rf ~/app_deploy
             mkdir -p ~/app_deploy
+            echo "Created app_deploy directory"
           '
           
+          echo "Copying files to EC2..."
           scp -i ~/.ssh/id_rsa -r ./* ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/app_deploy/
 
-          # .env 파일 생성 및 전송
+          # .env 파일 생성 및 내용 확인
+          echo "Creating .env file..."
           cat << EOF > .env
 DB_HOST=${{ secrets.DB_HOST }}
 DB_USER=${{ secrets.DB_USER }}
@@ -67,15 +71,26 @@ OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
 TAVILY_API_KEY=${{ secrets.TAVILY_API_KEY }}
 EOF
 
-          # .env 파일 전송
+          echo "Checking .env file content:"
+          cat .env
+
+          echo "Copying .env file to EC2..."
           scp -i ~/.ssh/id_rsa .env ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }}:~/app_deploy/.env
           rm .env
 
-          # 배포 실행
+          # 배포 실행 및 디버깅
+          echo "Starting deployment..."
           ssh -i ~/.ssh/id_rsa -o ConnectTimeout=10 ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} '
-            cd ~/app_deploy &&
-            chmod 600 .env &&
-            chmod +x deploy.sh &&
-            sudo -E bash deploy.sh
+            set -x
+            cd ~/app_deploy
+            pwd
+            ls -la
+            echo "Checking .env file:"
+            cat .env
+            echo "Setting file permissions..."
+            chmod 600 .env
+            chmod +x deploy.sh
+            echo "Running deploy.sh..."
+            sudo -E bash -x deploy.sh
           '
 #
