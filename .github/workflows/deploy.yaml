@@ -63,7 +63,7 @@ jobs:
             echo "MAIL_PORT=${{ secrets.MAIL_PORT }}" >> .env &&
             echo "MAIL_SERVER=${{ secrets.MAIL_SERVER }}" >> .env &&
             echo "YOUNG_API_KEY=${{ secrets.YOUNG_API_KEY }}" >> .env &&
-            echo "INFOMATION_API_KEY=${{ secrets.INFOMATION_API_KEY }}" >> .env &&
+            echo "INFORMATION_API_KEY=${{ secrets.INFORMATION_API_KEY }}" >> .env &&
             echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}" >> .env &&
             echo "TAVILY_API_KEY=${{ secrets.TAVILY_API_KEY }}" >> .env &&
             chmod +x deploy.sh &&
