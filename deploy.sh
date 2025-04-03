@@ -170,8 +170,8 @@ echo "Installing dependencies..."
 # pip 캐시 사용하지 않고 설치
 pip install --no-cache-dir --no-deps -r requirements.txt
 
-# 나머지 의존성 설치
-pip install --no-cache-dir -r requirements.txt
+# 나머지 의존성 설치 (CPU 버전 사용)
+pip install --no-cache-dir --extra-index-url https://download.pytorch.org/whl/cpu -r requirements.txt
 
 # Nginx 설정 테스트 및 재시작
 echo "Testing and restarting Nginx..."
@@ -186,7 +186,14 @@ cd /var/www/back
 sudo pkill uvicorn || true
 
 # ubuntu 사용자로 uvicorn 실행
-sudo -u ubuntu bash -c 'cd /var/www/back && nohup python -m uvicorn app:app --host 0.0.0.0 --port 8000 --workers 3 --log-level debug > /var/log/fastapi/uvicorn.log 2>&1 &'
+sudo -u ubuntu bash -c '
+    cd /var/www/back &&
+    source /home/ubuntu/miniconda/bin/activate &&
+    conda activate fastapi-env &&
+    export PATH="/home/ubuntu/miniconda/envs/fastapi-env/bin:$PATH" &&
+    source .env &&
+    nohup python -m uvicorn app:app --host 0.0.0.0 --port 8000 --workers 1 > /var/log/fastapi/uvicorn.log 2>&1 &
+'
 
 # 애플리케이션 시작 확인을 위한 대기
 sleep 5
