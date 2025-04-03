@@ -43,6 +43,7 @@ jobs:
           ssh -i ~/.ssh/id_rsa -o ConnectTimeout=10 ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_HOST }} '
             cd ~/app_deploy &&
             chmod +x deploy.sh &&
-            DB_VARIABLES='"'"'${{ secrets.DB_VARIABLES }}'"'"' sudo -E bash deploy.sh
+            echo "$DB_VARIABLES" > .env &&
+            sudo -E bash deploy.sh
           '
 #
