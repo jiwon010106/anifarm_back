@@ -66,7 +66,7 @@ jobs:
             MAIL_PORT="${{ secrets.MAIL_PORT }}" \
             MAIL_SERVER="${{ secrets.MAIL_SERVER }}" \
             YOUNG_API_KEY="${{ secrets.YOUNG_API_KEY }}" \
-            INFORMATION_API_KEY="${{ secrets.INFORMATION_API_KEY }}" \
+            INFOMATION_API_KEY="${{ secrets.INFORMATION_API_KEY }}" \
             OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" \
             TAVILY_API_KEY="${{ secrets.TAVILY_API_KEY }}" \
             sudo -E bash deploy.sh
