@@ -1,6 +1,77 @@
 #!/bin/bash
 set -e  # 오류 발생시 스크립트 중단
 
+# 필수 환경 변수 확인
+required_vars=(
+    "DB_HOST"
+    "DB_USER"
+    "DB_PASS"
+    "DB_NAME"
+    "DB_PORT"
+    "JWT_SECRET"
+    "EMAIL"
+    "EMAIL_PASSWORD"
+    "WEATHER_API_KEY"
+    "KMA_API_KEY"
+    "KAMIS_API_KEY"
+    "DATAENCODING_API_KEY"
+    "DATADECODING_API_KEY"
+    "YOUTUBE_API_KEY"
+    "NAVER_CLIENT_ID"
+    "NAVER_CLIENT_SECRET"
+    "MAIL_USERNAME"
+    "MAIL_PASSWORD"
+    "MAIL_FROM"
+    "MAIL_PORT"
+    "MAIL_SERVER"
+    "YOUNG_API_KEY"
+    "INFOMATION_API_KEY"
+    "OPENAI_API_KEY"
+    "TAVILY_API_KEY"
+)
+
+# 환경 변수 존재 여부 확인
+for var in "${required_vars[@]}"; do
+    if [ -z "${!var}" ]; then
+        echo "Error: Required environment variable $var is not set"
+        exit 1
+    fi
+done
+
+# .env 파일 생성
+echo "Creating .env file..."
+cat > .env << EOF
+DB_HOST=${DB_HOST}
+DB_USER=${DB_USER}
+DB_PASS=${DB_PASS}
+DB_NAME=${DB_NAME}
+DB_PORT=${DB_PORT}
+JWT_SECRET=${JWT_SECRET}
+EMAIL=${EMAIL}
+EMAIL_PASSWORD=${EMAIL_PASSWORD}
+WEATHER_API_KEY=${WEATHER_API_KEY}
+KMA_API_KEY=${KMA_API_KEY}
+KAMIS_API_KEY=${KAMIS_API_KEY}
+DATAENCODING_API_KEY=${DATAENCODING_API_KEY}
+DATADECODING_API_KEY=${DATADECODING_API_KEY}
+YOUTUBE_API_KEY=${YOUTUBE_API_KEY}
+NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
+NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
+MAIL_USERNAME=${MAIL_USERNAME}
+MAIL_PASSWORD=${MAIL_PASSWORD}
+MAIL_FROM=${MAIL_FROM}
+MAIL_PORT=${MAIL_PORT}
+MAIL_SERVER=${MAIL_SERVER}
+YOUNG_API_KEY=${YOUNG_API_KEY}
+INFOMATION_API_KEY=${INFOMATION_API_KEY}
+OPENAI_API_KEY=${OPENAI_API_KEY}
+TAVILY_API_KEY=${TAVILY_API_KEY}
+EOF
+
+# .env 파일 권한 설정
+sudo chown ubuntu:ubuntu .env
+chmod 600 .env
+
 # 디스크 공간 확인
 echo "Initial disk space usage:"
 df -h
@@ -56,23 +127,6 @@ sudo cp -r * /var/www/back/
 # Navigate to the app directory and handle .env file
 cd /var/www/back/
 echo "Setting up .env file..."
-
-# .env 파일 생성
-if [ -n "$DB_VARIABLES" ]; then
-    echo "$DB_VARIABLES" | sudo tee .env > /dev/null
-    sudo chown ubuntu:ubuntu .env
-    echo ".env file created from DB_VARIABLES"
-elif [ -f env ]; then
-    sudo mv env .env
-    sudo chown ubuntu:ubuntu .env
-    echo ".env file created from env file"
-elif [ -f .env ]; then
-    sudo chown ubuntu:ubuntu .env
-    echo ".env file already exists"
-else
-    echo "Warning: No environment variables found"
-    exit 1
-fi
 
 # .env 파일 확인
 echo "Checking .env file..."
