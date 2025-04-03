@@ -44,7 +44,7 @@ jobs:
             cd ~/app_deploy &&
             chmod +x deploy.sh &&
             echo "$DB_VARIABLES" > .env &&
-            source .env &&
+            export $(cat .env | xargs) &&
             sudo -E bash deploy.sh
           '
 #

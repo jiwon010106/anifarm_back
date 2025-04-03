@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e  # 오류 발생시 스크립트 중단
 
+# 디버깅: 현재 환경 변수 출력
+echo "Current environment variables:"
+env | grep -E "DB_|JWT_|EMAIL_|WEATHER_|KMA_|KAMIS_|DATA|YOUTUBE_|NAVER_|MAIL_|YOUNG_|INFO|OPENAI_|TAVILY_"
+
 # 필수 환경 변수 확인
 required_vars=(
     "DB_HOST"
